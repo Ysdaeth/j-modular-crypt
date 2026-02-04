@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.github.ysdaeth.j-modular-crypt</groupId>
+  <artifactId>j-modular-crypt</artifactId>
+  <version>1.2</version>
+  <packaging>pom</packaging>
+
+  <name>j-modular-crypt</name>
+
+  <modules>
+    <module>api</module>
+    <module>common</module>
+    <module>implementation</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.14.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.12.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.4.0</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Ysdaeth Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/Ysdaeth/j-modular-crypt</url>
+    </repository>
+  </distributionManagement>
+</project>
