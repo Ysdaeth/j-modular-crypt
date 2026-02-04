@@ -1,6 +1,6 @@
-package io.github.ysdaeth.jmodularcrypt.impl.rsa;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
 
-import io.github.ysdaeth.jmodularcrypt.api.AsymmetricEncryptor;
+import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,7 +23,7 @@ public class RsaEncryptorsTest {
 
     @ParameterizedTest
     @MethodSource("provider")
-    void encrypt_shouldNotReturnBlank(AsymmetricEncryptor encryptor) throws Exception{
+    void encrypt_shouldNotReturnBlank(Encryptor encryptor) throws Exception{
         byte[] credentials = getSecret();
         String encrypted = encryptor.encrypt(credentials);
         Assertions.assertFalse(encrypted.isBlank(),"Encrypted is blank for: "+encryptor.getClass());
@@ -31,7 +31,7 @@ public class RsaEncryptorsTest {
 
     @ParameterizedTest
     @MethodSource("provider")
-    void encrypt_shouldNotReturnTheSameArray(AsymmetricEncryptor encryptor) throws Exception{
+    void encrypt_shouldNotReturnTheSameArray(Encryptor encryptor) throws Exception{
         byte[] expected = getSecret();
         String encrypted = encryptor.encrypt(expected);
         String base64 = Arrays.stream(encrypted.split("\\$")).toList().getLast();
@@ -42,7 +42,7 @@ public class RsaEncryptorsTest {
 
     @ParameterizedTest
     @MethodSource("provider")
-    void decrypt_shouldReturnSecret(AsymmetricEncryptor encryptor) throws Exception{
+    void decrypt_shouldReturnSecret(Encryptor encryptor) throws Exception{
         byte[] expected = getSecret();
         String encrypted = encryptor.encrypt(expected);
         byte[] actual = encryptor.decrypt(encrypted);
@@ -50,7 +50,7 @@ public class RsaEncryptorsTest {
         Assertions.assertTrue(equals,"Secret after decryption is not the same");
     }
 
-    public static Stream<AsymmetricEncryptor> provider() throws Exception{
+    public static Stream<Encryptor> provider() throws Exception{
         KeyPair keyPair = keyGen();
         PublicKey publicKey = keyPair.getPublic();
         PrivateKey privateKey = keyPair.getPrivate();

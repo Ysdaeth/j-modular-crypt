@@ -1,10 +1,10 @@
-package io.github.ysdaeth.jmodularcrypt.impl.rsa;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
 
+import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
 import io.github.ysdaeth.jmodularcrypt.core.aes.BaseAes;
 import io.github.ysdaeth.jmodularcrypt.core.aes.BaseAesFactory;
 import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsa;
 import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsaFactory;
-import io.github.ysdaeth.jmodularcrypt.api.HybridEncryptor;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
@@ -28,11 +28,11 @@ import java.util.Arrays;
  * Randomly generated AES secret key is used to encrypt credentials. Initial vector
  * is random 12bytes length.
  * After encrypting credentials random key itself is encrypted with RSA.
- * For more details see {@link HybridEncryptor}
+ *
  * <p>Example</p>
  * $RSA-OAEP-SHA256-MGF1+AES-GCM-256 $v=1 $iv=abc $encryptedKey $encryptedValue  (without spaces)
  */
-public class EncryptorRsaOaepAesGcm implements HybridEncryptor {
+public class EncryptorRsaOaepAesGcm implements Encryptor {
     public static final String ID = "RSA-OAEP-SHA256-MGF1+AES-GCM-256";
     private static final String ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
     private static final String VERSION = "v=1";
@@ -62,7 +62,8 @@ public class EncryptorRsaOaepAesGcm implements HybridEncryptor {
      */
     public EncryptorRsaOaepAesGcm(PublicKey publicKey, PrivateKey privateKey) {
         try{
-            setKey(publicKey,privateKey);
+            this.publicKey = validateKey(publicKey);
+            this.privateKey = validateKey(privateKey);
             keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(256);
             baseAes = BaseAesFactory.getInstance("GCM");
@@ -70,20 +71,6 @@ public class EncryptorRsaOaepAesGcm implements HybridEncryptor {
         }catch (Exception e){
             throw new RuntimeException("Could not configure class. Root cause"+ e.getMessage(), e);
         }
-    }
-
-    /**
-     * Set keys for encryption and decryption. Keys do not need to be a pair.
-     * When are not a pair, that means key rotation can be done by the same instance, but
-     * encryption and decryption using the same key pair must provide keys of the same key pair.
-     * @param publicKey encryption key
-     * @param privateKey decryption key
-     * @throws IllegalArgumentException when key algorithm does not match, or null
-     */
-    @Override
-    public void setKey(PublicKey publicKey, PrivateKey privateKey) {
-        this.publicKey = validateKey(publicKey);
-        this.privateKey = validateKey(privateKey);
     }
 
     /**
@@ -121,14 +108,14 @@ public class EncryptorRsaOaepAesGcm implements HybridEncryptor {
      * and return decrypted as string. It uses {@link Serializer} configured to match
      * MCF format. It decrypts encrypted AES 256bit key with RSA private key. Decrypted AES
      * key is used to decrypt main data
-     * @param serializedMcf credentials to be decrypted from Modular Crypt Format
+     * @param encrypted credentials to be decrypted from Modular Crypt Format
      *                      string representation
      * @return decrypted credentials as string
      * @throws KeyException when key does not match or is invalid
      */
     @Override
-    public byte[] decrypt(String serializedMcf) throws KeyException {
-        McfModel model = modelSerializer.deserialize(serializedMcf,McfModel.class);
+    public byte[] decrypt(String encrypted) throws KeyException {
+        McfModel model = modelSerializer.deserialize(encrypted,McfModel.class);
         McfParams params = paramsSerializer.deserialize(model.params,McfParams.class);
         byte[] keyBytes = baseRsa.decrypt(model.encryptedKey,privateKey);
         SecretKey secretKey = new SecretKeySpec(keyBytes,"AES");

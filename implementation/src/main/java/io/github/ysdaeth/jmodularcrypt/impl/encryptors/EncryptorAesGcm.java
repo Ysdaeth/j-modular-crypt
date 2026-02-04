@@ -1,11 +1,11 @@
-package io.github.ysdaeth.jmodularcrypt.impl.aes;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
 
 
+import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
 import io.github.ysdaeth.jmodularcrypt.config.ModelSerializerConfig;
 import io.github.ysdaeth.jmodularcrypt.config.ParametersSerializerConfig;
 import io.github.ysdaeth.jmodularcrypt.core.aes.BaseAes;
 import io.github.ysdaeth.jmodularcrypt.core.aes.BaseAesFactory;
-import io.github.ysdaeth.jmodularcrypt.api.SymmetricEncryptor;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
@@ -22,11 +22,11 @@ import java.util.Arrays;
  * service functionality.
  * It is designed to provide Modular Crypt Format standard output.
  * It uses {@link ModelSerializerConfig} for{@link Serializer}.
- * For more details see {@link SymmetricEncryptor}
+ * For more details see {@link Encryptor}
  * <p>Example</p>
  * $AES-GCM $v=1 $iv=aBc $encryptedValue  (without spaces)
  */
-public class EncryptorAesGcm implements SymmetricEncryptor {
+public class EncryptorAesGcm implements Encryptor {
 
     public static final String ID = "AES-GCM";
     private static final String VERSION = "v=1";
@@ -94,14 +94,14 @@ public class EncryptorAesGcm implements SymmetricEncryptor {
      * Decrypt Modular Crypt Format string representation
      * and return decrypted secret as string. It uses {@link Serializer} configured to match
      * MCF format.
-     * @param serializedMcf secret to be decrypted from Modular Crypt Format
+     * @param encrypted secret to be decrypted from Modular Crypt Format
      *                      string representation
      * @return decrypted secret
      * @throws KeyException when key does not match or is invalid
      */
     @Override
-    public byte[] decrypt(String serializedMcf) throws KeyException {
-        McfEntity model = modelSerializer.deserialize(serializedMcf, McfEntity.class);
+    public byte[] decrypt(String encrypted) throws KeyException {
+        McfEntity model = modelSerializer.deserialize(encrypted, McfEntity.class);
         ParamsMcf params = paramsSerializer.deserialize(model.params,ParamsMcf.class);
         return baseAes.decrypt(model.encrypted,secretKey,params.iv);
     }
@@ -120,16 +120,6 @@ public class EncryptorAesGcm implements SymmetricEncryptor {
     @Override
     public String version() {
         return VERSION;
-    }
-
-    /**
-     * Set key for encryption and decryption.
-     * @param secretKey key for encryption and decryption
-     * @throws IllegalArgumentException when key algorithm does not match, or null
-     */
-    @Override
-    public void setKey(SecretKey secretKey) {
-        this.secretKey = validateKey(secretKey);
     }
 
     private static SecretKey validateKey(SecretKey secretKey){

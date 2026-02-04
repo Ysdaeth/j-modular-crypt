@@ -13,20 +13,20 @@ public interface Encryptor {
     /**
      * Encrypt given character sequence and return its representation
      * in Modular Crypt Format
-     * @param charSequence credentials to be encrypted
+     * @param secret credentials to be encrypted
      * @return Modular Crypt Format string value
      * @throws KeyException when key is invalid, missing or not recognized
      */
-    String encrypt(byte[] charSequence) throws KeyException;
+    String encrypt(byte[] secret) throws KeyException;
 
     /**
      * Decrypt given Modular Crypt Format string representation
      * and return decrypted value
-     * @param mcf Modular Crypt Format string produced by the algorithm.
+     * @param encrypted Modular Crypt Format string produced by the algorithm.
      * @return decrypted credentials
      * @throws KeyException when key is invalid, missing or not recognized
      */
-    byte[] decrypt(String mcf) throws KeyException;
+    byte[] decrypt(String encrypted) throws KeyException;
 
     /**\
      * Returns the cryptographic algorithm identifier.

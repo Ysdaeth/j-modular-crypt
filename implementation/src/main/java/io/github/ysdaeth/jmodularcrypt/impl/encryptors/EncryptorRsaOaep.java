@@ -1,8 +1,8 @@
-package io.github.ysdaeth.jmodularcrypt.impl.rsa;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
 
+import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
 import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsa;
 import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsaFactory;
-import io.github.ysdaeth.jmodularcrypt.api.AsymmetricEncryptor;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
@@ -19,11 +19,11 @@ import java.util.Arrays;
  * service functionality, like email address. If data exceeds algorithm capacity then use
  * {@link EncryptorRsaOaepAesGcm}
  * It is designed to provide Modular Crypt Format standard output.
- * For more details see {@link AsymmetricEncryptor}
+ * For more details see {@link Encryptor}
  * <p>Example</p>
  * $RSA-OAEP-SHA256-MGF1 $v=1 $encryptedValue  (without spaces)
  */
-public final class EncryptorRsaOaep implements AsymmetricEncryptor {
+public final class EncryptorRsaOaep implements Encryptor {
     public static final String ID = "RSA-OAEP-SHA256-MGF1";
     private static final String VERSION = "v=1";
     private final Serializer serializer ;
@@ -40,27 +40,14 @@ public final class EncryptorRsaOaep implements AsymmetricEncryptor {
      */
     public EncryptorRsaOaep(PublicKey publicKey, PrivateKey privateKey){
         try{
-            setKey(publicKey,privateKey);
+            this.publicKey = validateKey(publicKey);
+            this.privateKey = validateKey(privateKey);
         }catch (Exception e){
             throw new RuntimeException(e);
         }
         SerializerConfiguration configuration = new ModelSerializerConfig();
         this.serializer = new ConfigurableSerializer(configuration);
         this.baseRsa = BaseRsaFactory.getInstance("OAEP");
-    }
-
-    /**
-     * Set keys for encryption and decryption. Keys do not need to be a pair.
-     * When are not a pair, then key rotation can be done by the same instance, but
-     * encryption and decryption using key pair is recommended.
-     * @param publicKey encryption key
-     * @param privateKey decryption key
-     * @throws IllegalArgumentException when key algorithm does not match, or null
-     */
-    @Override
-    public void setKey(PublicKey publicKey, PrivateKey privateKey) {
-        this.publicKey = validateKey(publicKey);
-        this.privateKey = validateKey(privateKey);
     }
 
     /**
