@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.core.rsa;
+package io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

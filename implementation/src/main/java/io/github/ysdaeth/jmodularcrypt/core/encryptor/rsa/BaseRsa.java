@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.core.rsa;
+package io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa;
 
 import java.security.KeyException;
 import java.security.PrivateKey;

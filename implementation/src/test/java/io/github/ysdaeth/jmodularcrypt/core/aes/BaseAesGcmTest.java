@@ -1,5 +1,7 @@
 package io.github.ysdaeth.jmodularcrypt.core.aes;
 
+import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAes;
+import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAesFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;

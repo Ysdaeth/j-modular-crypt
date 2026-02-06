@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.core.aes;
+package io.github.ysdaeth.jmodularcrypt.core.encryptor.aes;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;

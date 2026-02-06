@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;

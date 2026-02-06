@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.core.aes;
+package io.github.ysdaeth.jmodularcrypt.core.encryptor.aes;
 
 /**
  * Factory for internal base AES implementations only. It provides

@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.core.rsa;
+package io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa;
 
 /**
  * Factory for internal base RSA implementations only. It provides

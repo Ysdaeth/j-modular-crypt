@@ -1,7 +1,7 @@
 # j-crypt-credentials
 
 **j-crypt-credentials** is a Java library that standardizes cryptographic algorithm outputs into  **MCF (Modular Crypt Format)**.  
-It provides a complete set of tools for **serialization, parsing and conversion** of MCF structures.
+It provides a complete set of tools for `serialization`, `parsing` and `conversion` of MCF structures.
 
 The library is designed to be used as a reusable dependency.
 
@@ -29,7 +29,7 @@ The library is designed to be used as a reusable dependency.
 ### API module
 The `api` package contains **interfaces intended for third-party applications**.
 
-Modules with the `impl` postfix provide **reference implementations** of the API that return results in MCF format.
+`implementation` module provide **implementations** of the API that return results in MCF format.
 
 ---
 
@@ -50,4 +50,5 @@ Module contains implementations of `API` module, and provides cryptographic algo
 ---
 
 ## Details
-For more details see package descriptions
+For more details see packages descriptions  
+https://github.com/Ysdaeth?tab=packages&repo_name=j-modular-crypt

@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
 import org.junit.jupiter.api.Assertions;

@@ -1,8 +1,8 @@
-package io.github.ysdaeth.jmodularcrypt.impl.encryptors;
+package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
-import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsa;
-import io.github.ysdaeth.jmodularcrypt.core.rsa.BaseRsaFactory;
+import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsa;
+import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsaFactory;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
