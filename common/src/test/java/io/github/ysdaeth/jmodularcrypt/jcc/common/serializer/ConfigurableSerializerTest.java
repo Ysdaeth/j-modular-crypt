@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.jcc.common;
+package io.github.ysdaeth.jmodularcrypt.jcc.common.serializer;
 
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;

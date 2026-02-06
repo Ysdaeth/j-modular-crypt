@@ -12,7 +12,10 @@ import java.util.function.Function;
  * common types.
  * it supports conversion of primitives and simple objects to string, and
  * string to primitives/objects.
+ *
+ * @deprecated use {@link ConversionRegistry}
  */
+@Deprecated(forRemoval = true)
 public final class BasicTypeConverter implements TypeConverter {
     public BasicTypeConverter(){}
 

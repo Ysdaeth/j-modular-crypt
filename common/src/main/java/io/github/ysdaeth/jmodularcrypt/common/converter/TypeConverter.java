@@ -3,7 +3,10 @@ package io.github.ysdaeth.jmodularcrypt.common.converter;
 /**
  * It is recommended that implementation of this interface be able to dynamically
  * select implementation for different data types, IE. use map where key is a class, and value is cast: (T)object
+ *
+ * @deprecated use {@link ConversionRegistry}
  */
+@Deprecated(forRemoval = true)
 public interface TypeConverter {
     /**
      * This method will return string value of specified object
