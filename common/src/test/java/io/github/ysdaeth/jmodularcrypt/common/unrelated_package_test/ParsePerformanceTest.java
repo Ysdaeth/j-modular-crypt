@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.jcc.common.unrelated_package_test;
+package io.github.ysdaeth.jmodularcrypt.common.unrelated_package_test;
 
 import io.github.ysdaeth.jmodularcrypt.common.parser.Section;
 

@@ -1,4 +1,4 @@
-package io.github.ysdaeth.jmodularcrypt.jcc.common.parser;
+package io.github.ysdaeth.jmodularcrypt.common.parser;
 
 import io.github.ysdaeth.jmodularcrypt.common.parser.McfParametersParser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Section;

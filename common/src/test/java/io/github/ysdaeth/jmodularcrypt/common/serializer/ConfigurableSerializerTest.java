@@ -1,14 +1,13 @@
-package io.github.ysdaeth.jmodularcrypt.jcc.common.serializer;
+package io.github.ysdaeth.jmodularcrypt.common.serializer;
 
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
-import io.github.ysdaeth.jmodularcrypt.common.converter.BasicTypeConverter;
-import io.github.ysdaeth.jmodularcrypt.common.converter.TypeConverter;
+import io.github.ysdaeth.jmodularcrypt.common.converter.ConversionRegistry;
+import io.github.ysdaeth.jmodularcrypt.common.converter.McfConverterBase64;
 import io.github.ysdaeth.jmodularcrypt.common.parser.McfParser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Parser;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.SerializerConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 
 /**
  * Integration test for {@link ConfigurableSerializer} with
- * {@link SerializerConfiguration}
+ * {@link SerializerConfig}
  */
 class ConfigurableSerializerTest {
 
@@ -50,9 +49,9 @@ class ConfigurableSerializerTest {
 
     public static Stream<Arguments> parserProvider(){
 
-        SerializerConfiguration configuration = new SerializerConfiguration() {
+        SerializerConfig configuration = new SerializerConfig() {
             @Override
-            public TypeConverter typeConverter() {return new BasicTypeConverter();}
+            public ConversionRegistry typeConverter() {return new McfConverterBase64();}
             @Override
             public Parser parser() {return new McfParser();}
         };
