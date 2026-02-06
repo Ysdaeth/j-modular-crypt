@@ -1,8 +1,8 @@
 package io.github.ysdaeth.jmodularcrypt.common.serializer;
 
-import io.github.ysdaeth.jmodularcrypt.common.converter.TypeConverter;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
+import io.github.ysdaeth.jmodularcrypt.common.converter.ConversionRegistry;
 import io.github.ysdaeth.jmodularcrypt.common.parser.McfParser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Parser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Section;
@@ -21,7 +21,7 @@ import java.util.function.Function;
  * This class converts between serialized {@link String} representations and Java objects
  * which fields are annotated with annotations such as:
  * {@link Module}.
- * Class can use {@link SerializerConfiguration} which provides {@link Parser} and {@link TypeConverter}
+ * Class can use {@link SerializerConfig} which provides {@link Parser} and {@link ConversionRegistry}
  * for parsing strings and converting them to values.
  * During the first encounter of given class, the parser uses reflection to build immutable metadata
  * for modules and entity class, along with assigned implementation of serializer and
@@ -45,22 +45,22 @@ import java.util.function.Function;
  * <ol>
  *     <li>Public no args constructor</li>
  *     <li>Fields annotated with {@link Module}</li>
- *     <li>Field types supported by the {@link TypeConverter} </li>
+ *     <li>Field types supported by the {@link ConversionRegistry} </li>
  * </ol>
  * <b> constructor annotated with {@link SerializerCreator} </b>
  * <ol>
  *     <li>Constructor annotated with {@link SerializerCreator} </li>
  *     <li>Public constructor with parameters in the same order as {@link Module#order()}</li>
  *     <li>Fields annotated with {@link Module} </li>
- *     <li>Field types supported by the provided {@link TypeConverter}</li>
+ *     <li>Field types supported by the provided {@link ConversionRegistry}</li>
  * </ol>
  */
 public final class ConfigurableSerializer implements Serializer {
     private static final Map<Class<?>, ClassSerializer> CACHE = new ConcurrentHashMap<>();
-    private final TypeConverter typeConverter;
+    private final ConversionRegistry typeConverter;
     private final Parser parser;
 
-    public ConfigurableSerializer(SerializerConfiguration configuration){
+    public ConfigurableSerializer(SerializerConfig configuration){
         typeConverter = configuration.typeConverter();
         parser = configuration.parser();
     }
@@ -176,7 +176,7 @@ public final class ConfigurableSerializer implements Serializer {
      * @param <T> type of object
      */
     private static <T> Function<T,Section[]> resolveSerializer(
-            List<ModuleAccessor> modules,TypeConverter converter){
+            List<ModuleAccessor> modules,ConversionRegistry converter){
 
         return createSerializer(modules,converter);
     }
@@ -188,19 +188,18 @@ public final class ConfigurableSerializer implements Serializer {
      * @param <T> instance parameter type
      */
     private static <T> Function<T, Section[]> createSerializer(
-            List<ModuleAccessor> modules, TypeConverter converter){
+            List<ModuleAccessor> modules, ConversionRegistry converter){
 
         return (obj)->{
             Section[] sections = new Section[modules.size()];
             try{
                 for(ModuleAccessor module: modules){
                     var value = module.getter().invoke(obj);
-                    String strValue = converter.objectToString(value);
-                    if(value == null) throw new IllegalArgumentException("field value must not be null.");
+                    String strValue = converter.convert(value,String.class);
                     sections[module.order()] = new Section(module.name(),strValue);
                 }
             }catch (Throwable e){
-                throw new RuntimeException("failed to serialize object. Cause:",e);
+                throw new RuntimeException("failed to serialize object. Cause:" + e.getCause(),e);
             }
             return sections;
         };
@@ -215,7 +214,7 @@ public final class ConfigurableSerializer implements Serializer {
      * @return deserialization implementation
      */
     private static Function<Section[],Object> resolveDeserializer(
-            List<ModuleAccessor> modules, TypeConverter converter, Constructor<?> constructor){
+            List<ModuleAccessor> modules, ConversionRegistry converter, Constructor<?> constructor){
         if(constructor.isAnnotationPresent(SerializerCreator.class) ){
             return createConstructorDeserializer(modules,converter,constructor);
         }else{
@@ -234,14 +233,14 @@ public final class ConfigurableSerializer implements Serializer {
      * @return deserialization implementation
      */
     private static Function<Section[],Object> createFieldsDeserializer(
-            List<ModuleAccessor> modules, TypeConverter converter, Constructor<?> constructor){
+            List<ModuleAccessor> modules, ConversionRegistry converter, Constructor<?> constructor){
         return (sections)->{
             Object instance;
             try{
                 instance = constructor.newInstance();
                 for(ModuleAccessor module :modules){
                     String value = sections[module.order()].value();
-                    var arg = converter.stringToObject(value,module.type());
+                    var arg = converter.convert(value,module.type());
                     module.setter().invoke(instance,arg);
                 }
             }catch (Throwable e){
@@ -262,7 +261,7 @@ public final class ConfigurableSerializer implements Serializer {
      * @return deserialization implementation
      */
     private static Function<Section[],Object> createConstructorDeserializer(
-            List<ModuleAccessor> modules, TypeConverter converter, Constructor<?> constructor){
+            List<ModuleAccessor> modules, ConversionRegistry converter, Constructor<?> constructor){
         return (sections)->{
             Object instance;
             try{
@@ -270,14 +269,14 @@ public final class ConfigurableSerializer implements Serializer {
                 for(int i =0; i < modules.size(); i++){
                     ModuleAccessor module = modules.get(i);
                     String value = sections[module.order()].value();
-                    var arg = converter.stringToObject(value,module.type());
+                    var arg = converter.convert(value,module.type());
                     args[i] = arg;
                 }
                 instance = constructor.newInstance(args);
             }catch (Exception e){
                 throw new RuntimeException("Could not instantiate object. " +
                         "Make sure parameters in constructor are in the same in the same order as" +
-                        " annotation order value on fields. Root cause: " + e.getMessage(), e);
+                        " annotation order value on fields. : " + e.getMessage(), e);
             }
             return instance;
         };

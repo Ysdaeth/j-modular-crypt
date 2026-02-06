@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>implementation</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>implementation</name>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>io.github.ysdaeth.j-modular-crypt</groupId>
             <artifactId>common</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
 
     </dependencies>

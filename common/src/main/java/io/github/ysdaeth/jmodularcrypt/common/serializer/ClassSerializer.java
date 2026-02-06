@@ -27,7 +27,7 @@ final class ClassSerializer {
     }
 
     /**
-     * Convert sections that represents substring of serialized string to object.
+     * Convert sections that represents substrings of serialized string to object.
      * {@link Parser}
      * @param parsed sections
      * @return
@@ -39,7 +39,6 @@ final class ClassSerializer {
         return deserializer.apply(parsed);
     }
 
-
     public Section[] serialize(Object object) {
         Section[] result = serializer.apply(object);
         if(result.length != modules.size()){
@@ -48,7 +47,5 @@ final class ClassSerializer {
         }
         return result;
     }
-
-
 
 }
