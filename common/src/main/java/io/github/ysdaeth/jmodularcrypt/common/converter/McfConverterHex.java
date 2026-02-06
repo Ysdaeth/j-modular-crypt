@@ -2,9 +2,18 @@ package io.github.ysdaeth.jmodularcrypt.common.converter;
 
 import java.util.HexFormat;
 
-public class McfConverterHex extends BaseStringRegistry{
+/**
+ * Converter for most common Modular Crypt Format data types.
+ * Encodes bytes to hexadecimal format
+ */
+public class McfConverterHex extends BaseStringConverter {
 
     private static final HexFormat HEX_FORMAT = HexFormat.of();
+
+    /**
+     * Create converter for Modular Crypt Format data types.
+     * Bytes are encoded to hexadecimal format
+     */
     public McfConverterHex(){
         register(byte[].class, String.class, McfConverterHex::byteToHex,McfConverterHex::hexToBytes);
         register(Byte[].class, String.class, McfConverterHex::byteToHex,McfConverterHex::hexToObjectBytes);

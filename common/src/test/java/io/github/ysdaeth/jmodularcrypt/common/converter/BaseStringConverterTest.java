@@ -3,10 +3,8 @@ package io.github.ysdaeth.jmodularcrypt.common.converter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class BaseStringRegistryTest {
-    ConversionRegistry registry = new BaseStringRegistry();
+class BaseStringConverterTest {
+    ConversionRegistry registry = new BaseStringConverter();
 
     @Test
     void convert_shouldReturnIntegerFromString(){
