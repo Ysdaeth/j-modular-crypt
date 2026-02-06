@@ -3,19 +3,19 @@ package io.github.ysdaeth.jmodularcrypt.config;
 
 import io.github.ysdaeth.jmodularcrypt.common.converter.ConversionRegistry;
 import io.github.ysdaeth.jmodularcrypt.common.converter.McfConverterBase64;
-import io.github.ysdaeth.jmodularcrypt.common.parser.McfParametersParser;
+import io.github.ysdaeth.jmodularcrypt.common.parser.McfParser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Parser;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.SerializerConfig;
 
 /**
  * Serializer configuration that provides basic type converter which
- * in which bytes are encoded to Hex format. Configuration is for
+ * in which bytes are encoded to base64 format. Configuration is for
  * {@link io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer}
  */
-public final class ParametersSerializerConfig extends SerializerConfig {
+public final class McfModelBase64 extends SerializerConfig {
 
     /**
-     * Converter that converts bytes to hex format
+     * Converter that converts bytes to base 64 format
      * @return Serializer configuration
      */
     @Override
@@ -24,12 +24,12 @@ public final class ParametersSerializerConfig extends SerializerConfig {
     }
 
     /**
-     * Returns parser that parses parameter Modular Crypt Format sections
-     * separated with ',' parameter is section between '$' signs
-     * @return parser for parameter sections
+     * Returns parser that parses standard Modular Crypt Format sections
+     * separated with '$' signs
+     * @return parser for standard sections
      */
     @Override
     public Parser parser() {
-        return new McfParametersParser();
+        return new McfParser();
     }
 }

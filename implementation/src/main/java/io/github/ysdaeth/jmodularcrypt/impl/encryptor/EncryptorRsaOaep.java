@@ -1,14 +1,14 @@
 package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
+import io.github.ysdaeth.jmodularcrypt.common.serializer.SerializerConfig;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsa;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsaFactory;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.SerializerConfiguration;
-import io.github.ysdaeth.jmodularcrypt.config.ModelSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
 
 import java.security.*;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ public final class EncryptorRsaOaep implements Encryptor {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
-        SerializerConfiguration configuration = new ModelSerializerConfig();
+        SerializerConfig configuration = new McfModelBase64();
         this.serializer = new ConfigurableSerializer(configuration);
         this.baseRsa = BaseRsaFactory.getInstance("OAEP");
     }

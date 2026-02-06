@@ -199,7 +199,7 @@ public final class ConfigurableSerializer implements Serializer {
                     sections[module.order()] = new Section(module.name(),strValue);
                 }
             }catch (Throwable e){
-                throw new RuntimeException("failed to serialize object. Cause:",e);
+                throw new RuntimeException("failed to serialize object. Cause:" + e.getCause(),e);
             }
             return sections;
         };
@@ -276,7 +276,7 @@ public final class ConfigurableSerializer implements Serializer {
             }catch (Exception e){
                 throw new RuntimeException("Could not instantiate object. " +
                         "Make sure parameters in constructor are in the same in the same order as" +
-                        " annotation order value on fields. Root cause: " + e.getMessage(), e);
+                        " annotation order value on fields. : " + e.getMessage(), e);
             }
             return instance;
         };

@@ -2,7 +2,7 @@ package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
-import io.github.ysdaeth.jmodularcrypt.config.ModelSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
 import io.github.ysdaeth.jmodularcrypt.config.ParametersSerializerConfig;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAes;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAesFactory;
@@ -21,7 +21,7 @@ import java.util.Arrays;
  * Class purpose is to encrypt credentials that are needed to be recovered for
  * service functionality.
  * It is designed to provide Modular Crypt Format standard output.
- * It uses {@link ModelSerializerConfig} for{@link Serializer}.
+ * It uses {@link McfModelBase64} for{@link Serializer}.
  * For more details see {@link Encryptor}
  * <p>Example</p>
  * $AES-GCM $v=1 $iv=aBc $encryptedValue  (without spaces)
@@ -35,7 +35,7 @@ public class EncryptorAesGcm implements Encryptor {
     private SecretKey secretKey;
     static{
         modelSerializer = new ConfigurableSerializer(
-                new ModelSerializerConfig()
+                new McfModelBase64()
         );
         paramsSerializer = new ConfigurableSerializer(
                 new ParametersSerializerConfig()

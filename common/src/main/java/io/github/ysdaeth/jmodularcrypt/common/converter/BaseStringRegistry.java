@@ -1,5 +1,6 @@
 package io.github.ysdaeth.jmodularcrypt.common.converter;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 
@@ -20,9 +21,10 @@ import java.util.function.Function;
 public class BaseStringRegistry extends ConversionRegistry {
 
     public BaseStringRegistry(){
-        register(String.class,String.class, Function.identity(), Object::toString);
+        register(String.class,String.class, Objects::toString, Object::toString);
         register(Integer.class,String.class, Object::toString, Integer::valueOf);
         register(int.class,String.class, Object::toString, Integer::valueOf);
         register(Character.class,String.class,(c)->""+c, (ch)->ch.charAt(0));
+        register(char.class,String.class,(c)->""+c, (ch)->ch.charAt(0));
     }
 }

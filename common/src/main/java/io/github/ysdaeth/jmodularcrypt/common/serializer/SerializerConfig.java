@@ -12,12 +12,12 @@ public abstract class SerializerConfig {
      * Type converter converts string to types and types to strings
      * @return Implementation of type converter
      */
-    abstract ConversionRegistry typeConverter();
+    public abstract ConversionRegistry typeConverter();
 
     /**
      * Return parser that is meant to work with simple line formats
      * @return Simple line parser implementation
      */
-    abstract Parser parser();
+    public abstract Parser parser();
 
 }

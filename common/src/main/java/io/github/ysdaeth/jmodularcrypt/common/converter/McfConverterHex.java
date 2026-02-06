@@ -2,7 +2,7 @@ package io.github.ysdaeth.jmodularcrypt.common.converter;
 
 import java.util.HexFormat;
 
-public class McfConverterHex extends ConversionRegistry{
+public class McfConverterHex extends BaseStringRegistry{
 
     private static final HexFormat HEX_FORMAT = HexFormat.of();
     public McfConverterHex(){

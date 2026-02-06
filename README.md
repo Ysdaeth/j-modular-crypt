@@ -27,7 +27,7 @@ The library is designed to be used as a reusable dependency.
 ## Modules & Packages
 
 ### API module
-The `api` package contains **interfaces intended for third-party applications**.
+The `api` package contains interfaces intended for third-party applications.
 
 `implementation` module provide **implementations** of the API that return results in MCF format.
 
@@ -47,7 +47,20 @@ The `common` module contains core functionality shared across the library.
 ## Implementation module
 Module contains implementations of `API` module, and provides cryptographic algorithms that follow Modular Crypt Format output.
 
+### Mac
+
+- HMac Sha256
+- HMac Sha384
+- HMac Sha512
+
+### Encryptor
+
+- RSA OAEP
+- RSA OAEP + AES GCM
+- AES GCM
+
 ---
+
 
 ## Details
 For more details see packages descriptions  

@@ -23,6 +23,15 @@ public abstract class ConversionRegistry {
 
     private Map<TypePair, Function<?,?>> registry = new HashMap<>();
 
+    /**
+     * Register type converter that will convert between values
+     * @param from type of object
+     * @param to target type of object
+     * @param forwardFn function that convert value from type to target type
+     * @param backwardFn function that will revert conversion
+     * @param <T> Source type
+     * @param <R> Target type
+     */
     protected <T,R> void register(
             Class<T> from, Class<R> to,
             Function<T,R> forwardFn, Function<R,T> backwardFn){
@@ -31,6 +40,14 @@ public abstract class ConversionRegistry {
         registry.put(new TypePair(to,from), backwardFn);
     }
 
+    /**
+     * Convert specified value to target value using registered converter
+     * @param value value to be converted
+     * @param target target type that value is converted
+     * @return converted value to specified type
+     * @param <T> Current type
+     * @param <R> target Type
+     */
     @SuppressWarnings("unchecked")
     public <T,R> R convert(T value, Class<R> target){
         var forwardFn = registry.get(new TypePair(value.getClass(),target));

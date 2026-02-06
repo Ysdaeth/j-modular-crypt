@@ -4,6 +4,7 @@ import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.converter.ConversionRegistry;
 import io.github.ysdaeth.jmodularcrypt.common.converter.McfConverterBase64;
+import io.github.ysdaeth.jmodularcrypt.common.converter.McfConverterHex;
 import io.github.ysdaeth.jmodularcrypt.common.parser.McfParser;
 import io.github.ysdaeth.jmodularcrypt.common.parser.Parser;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
@@ -25,24 +26,24 @@ class ConfigurableSerializerTest {
 
     @ParameterizedTest
     @MethodSource("parserProvider")
-    void serializedStringShouldNotBeNull(Serializer parser, Object model){
-        String serialized = parser.serialize(new PublicFields());
+    void serializedStringShouldNotBeNull(Serializer serializer, Object model){
+        String serialized = serializer.serialize(new PublicFields());
         Assertions.assertNotNull(serialized,"serialized string was null");
     }
 
     @ParameterizedTest
     @MethodSource("parserProvider")
-    void serializedStringShouldNotBeBlank(Serializer parser, Object model){
-        String serialized = parser.serialize(model);
+    void serializedStringShouldNotBeBlank(Serializer serializer, Object model){
+        String serialized = serializer.serialize(model);
         Assertions.assertFalse(serialized.isBlank(),"serialized string was null");
     }
 
     @ParameterizedTest
     @MethodSource("parserProvider")
-    void deserializedShouldBeEqual(Serializer parser, Object model){
+    void deserializedShouldBeEqual(Serializer serializer, Object model){
         PublicFields expected = new PublicFields();
-        String serialized = parser.serialize(expected);
-        PublicFields actual = parser.deserialize(serialized, PublicFields.class);
+        String serialized = serializer.serialize(expected);
+        PublicFields actual = serializer.deserialize(serialized, PublicFields.class);
         Assertions.assertEquals(expected,actual,"The same MCF object does not equal after deserializing");
     }
 
@@ -55,18 +56,32 @@ class ConfigurableSerializerTest {
             @Override
             public Parser parser() {return new McfParser();}
         };
+
+        SerializerConfig hexConfig = new SerializerConfig() {
+            @Override
+            public ConversionRegistry typeConverter() {return new McfConverterHex();}
+            @Override
+            public Parser parser() {return new McfParser();}
+        };
+
         ConfigurableSerializer serializer = new ConfigurableSerializer(configuration);
+        ConfigurableSerializer mcfHexSerializer = new ConfigurableSerializer(hexConfig);
 
         return Stream.of(
                 Arguments.of(serializer, new PublicFields()),
+                Arguments.of(serializer, new PrivateFields()),
                 Arguments.of(serializer, new PrivateFields_ConstructorCreator()),
-                Arguments.of(serializer, new PrivateFinalFields_ConstructorCreator())
+                Arguments.of(serializer, new PrivateFinalFields_ConstructorCreator()),
+                Arguments.of(mcfHexSerializer, new PublicFields()),
+                Arguments.of(mcfHexSerializer, new PrivateFields()),
+                Arguments.of(mcfHexSerializer, new PrivateFields_ConstructorCreator()),
+                Arguments.of(mcfHexSerializer, new PrivateFinalFields_ConstructorCreator())
         );
     }
 
     static class PublicFields {
         @Module(order = 0)
-        public String identifier ="BasicMcfTypes";
+        public String identifier ="publicFieldsClass";
         @Module(order = 1)
         public String version ="v=1";
         @Module(order = 2)
@@ -94,7 +109,7 @@ class ConfigurableSerializerTest {
 
     static class PrivateFields {
         @Module(order = 0)
-        private String identifier ="BasicMcfTypes";
+        private String identifier ="privateFieldsClass";
         @Module(order = 1)
         private String version ="v=1";
         @Module(order = 2)
@@ -122,7 +137,7 @@ class ConfigurableSerializerTest {
 
     static class PrivateFields_ConstructorCreator {
         @Module(order = 0)
-        private String identifier ="BasicMcfTypes";
+        private String identifier ="constructorClass";
         @Module(order = 1)
         private String version ="v=1";
         @Module(order = 2)
@@ -168,7 +183,7 @@ class ConfigurableSerializerTest {
         private final byte[] secret;
 
         public PrivateFinalFields_ConstructorCreator(){
-            this.identifier ="BasicMcfTypes";
+            this.identifier ="finalFieldsConstructorClass";
             this.version ="v=1";
             this.iterations =2;
             this.secret= new byte[]{1,2,3};

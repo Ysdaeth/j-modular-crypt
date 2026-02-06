@@ -5,7 +5,7 @@ import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.config.ModelSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.config.McfModelHex;
 import io.github.ysdaeth.jmodularcrypt.core.mac.BaseHMac;
 
 import javax.crypto.SecretKey;
@@ -16,12 +16,12 @@ import javax.crypto.SecretKey;
  * verification of that signs.
  * Class uses {@link Serializer} to provide Modular Crypt Format outputs.
  */
-public abstract class AbstractHMac implements Mac {
+abstract class AbstractHMac implements Mac {
 
     private static final Serializer serializer;
     static{
         serializer = new ConfigurableSerializer(
-                new ModelSerializerConfig()
+                new McfModelHex()
         );
     }
 
@@ -52,7 +52,6 @@ public abstract class AbstractHMac implements Mac {
                 identifier(),
                 version(),
                 sign);
-
         return serializer.serialize(model);
     }
 

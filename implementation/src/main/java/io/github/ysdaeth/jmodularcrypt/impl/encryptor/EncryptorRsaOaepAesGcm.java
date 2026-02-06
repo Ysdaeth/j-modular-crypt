@@ -9,7 +9,7 @@ import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
 import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
 import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.config.ModelSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
 import io.github.ysdaeth.jmodularcrypt.config.ParametersSerializerConfig;
 
 import javax.crypto.KeyGenerator;
@@ -22,7 +22,7 @@ import java.util.Arrays;
  * Class uses RSA OAEP SHA256 with MGF1(SHA256) padding and AES GCM.
  * Class purpose is to encrypt credentials that size exceeds {@link EncryptorRsaOaep}
  * It is designed to provide Modular Crypt Format standard output.
- * It uses {@link ModelSerializerConfig} and {@link ParametersSerializerConfig} for
+ * It uses {@link McfModelBase64} and {@link ParametersSerializerConfig} for
  * {@link Serializer}
  * It generates new random 256bit {@link SecretKey} for every data encryption.
  * Randomly generated AES secret key is used to encrypt credentials. Initial vector
@@ -40,7 +40,7 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
     private static final Serializer paramsSerializer;
     static{
         modelSerializer = new ConfigurableSerializer(
-                new ModelSerializerConfig()
+                new McfModelBase64()
         );
         paramsSerializer = new ConfigurableSerializer(
                 new ParametersSerializerConfig()

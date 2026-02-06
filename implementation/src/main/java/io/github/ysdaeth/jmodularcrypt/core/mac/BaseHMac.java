@@ -12,6 +12,7 @@ public class BaseHMac {
      * @param algorithm HMac instance algorithm
      */
     public BaseHMac(String algorithm) {
+        if(algorithm == null) throw new IllegalArgumentException("Algorithm must not be null");
         this.algorithm = algorithm;
     }
 
@@ -28,7 +29,7 @@ public class BaseHMac {
             mac.init(secretKey);
             return mac.doFinal(message);
         }catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to create sign." + e.getMessage(),e);
         }
     }
 
