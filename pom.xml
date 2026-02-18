@@ -11,7 +11,7 @@
 
   <modules>
     <module>api</module>
-    <module>common</module>
+    <module>core</module>
     <module>implementation</module>
   </modules>
 

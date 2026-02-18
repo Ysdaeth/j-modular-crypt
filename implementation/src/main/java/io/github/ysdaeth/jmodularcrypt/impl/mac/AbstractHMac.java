@@ -1,11 +1,11 @@
 package io.github.ysdaeth.jmodularcrypt.impl.mac;
 
 import io.github.ysdaeth.jmodularcrypt.api.Mac;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.config.McfModelHex;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.Module;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.SerializerCreator;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.Serializer;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerFactory;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerType;
 import io.github.ysdaeth.jmodularcrypt.core.mac.BaseHMac;
 
 import javax.crypto.SecretKey;
@@ -18,12 +18,7 @@ import javax.crypto.SecretKey;
  */
 abstract class AbstractHMac implements Mac {
 
-    private static final Serializer serializer;
-    static{
-        serializer = new ConfigurableSerializer(
-                new McfModelHex()
-        );
-    }
+    private final Serializer serializer;
 
     private final String identifier;
     private final BaseHMac baseHMac;
@@ -38,6 +33,7 @@ abstract class AbstractHMac implements Mac {
         this.baseHMac = baseHMac;
         this.secretKey = secretKey;
         this.identifier = identifier;
+        serializer = SerializerFactory.getInstance(SerializerType.MCF_HEXADECIMAL);
     }
 
     /**

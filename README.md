@@ -1,9 +1,9 @@
-# j-crypt-credentials
+# j-modular-crypt
 
-**j-crypt-credentials** is a Java library that standardizes cryptographic algorithm outputs into  **MCF (Modular Crypt Format)**.  
-It provides a complete set of tools for `serialization`, `parsing` and `conversion` of MCF structures.
-
-The library is designed to be used as a reusable dependency.
+## About
+Annotation driven Java library that make Modular Crypt Format (MCF) outputs easier to create.
+Core functionality of the library is serialization and deserialization MCF structures, parsing,
+and conversion of basic data types commonly used used by MCF. 
 
 ---
 
@@ -13,7 +13,7 @@ The library is designed to be used as a reusable dependency.
 - API for cryptographic algorithm implementations
 - Reflection based MCF serialization and parsing
 - Configurable type conversion
-- Annotation driven object mapping
+- Annotation driven design
 - Default implementations
 
 ---
@@ -22,20 +22,17 @@ The library is designed to be used as a reusable dependency.
 
 - Standardizing encryption outputs
 - Interoperable cryptographic storage formats
-- Libraries or services requiring MCF compatibility
 
 ## Modules & Packages
 
 ### API module
 The `api` package contains interfaces intended for third-party applications.
 
-`implementation` module provide **implementations** of the API that return results in MCF format.
-
 ---
 
 ## Common module
 
-The `common` module contains core functionality shared across the library.
+The `core` module contains core functionality shared across the library.
 
 - Converter
 - Parser
@@ -45,7 +42,9 @@ The `common` module contains core functionality shared across the library.
 ---
 
 ## Implementation module
-Module contains implementations of `API` module, and provides cryptographic algorithms that follow Modular Crypt Format output.
+This module contains the base implementations of the `API` module/package.
+
+Provides encrypted/hashed data where algorithm output matches Modular Crypt Format. Cryptographic algorithms are supplied by the Java Security Provider. This is not core feature of the library, it serves as an access layer to cryptographic algorithms to get started quickly.
 
 ### Mac
 
@@ -60,6 +59,10 @@ Module contains implementations of `API` module, and provides cryptographic algo
 - AES GCM
 
 ---
+
+## Requirements
+- Java 17+
+- Java security provider for algorithms specified above.
 
 
 ## Details

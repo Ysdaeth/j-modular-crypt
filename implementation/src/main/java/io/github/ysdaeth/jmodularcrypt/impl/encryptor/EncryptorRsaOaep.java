@@ -1,14 +1,13 @@
 package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.SerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerFactory;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerType;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsa;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsaFactory;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.Module;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.SerializerCreator;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.Serializer;
 
 import java.security.*;
 import java.util.Arrays;
@@ -43,10 +42,9 @@ public final class EncryptorRsaOaep implements Encryptor {
             this.publicKey = validateKey(publicKey);
             this.privateKey = validateKey(privateKey);
         }catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException("Invalid key. Cause: " + e.getMessage(),e);
         }
-        SerializerConfig configuration = new McfModelBase64();
-        this.serializer = new ConfigurableSerializer(configuration);
+        this.serializer = SerializerFactory.getInstance(SerializerType.MCF_BASE64);
         this.baseRsa = BaseRsaFactory.getInstance("OAEP");
     }
 

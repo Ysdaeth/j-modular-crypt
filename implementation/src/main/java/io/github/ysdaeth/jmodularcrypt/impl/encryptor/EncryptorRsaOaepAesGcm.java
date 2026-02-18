@@ -1,16 +1,15 @@
 package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerFactory;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerType;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAes;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAesFactory;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsa;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.rsa.BaseRsaFactory;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
-import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
-import io.github.ysdaeth.jmodularcrypt.config.ParametersSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.Module;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.SerializerCreator;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.Serializer;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -21,8 +20,7 @@ import java.util.Arrays;
 /**
  * Class uses RSA OAEP SHA256 with MGF1(SHA256) padding and AES GCM.
  * Class purpose is to encrypt credentials that size exceeds {@link EncryptorRsaOaep}
- * It is designed to provide Modular Crypt Format standard output.
- * It uses {@link McfModelBase64} and {@link ParametersSerializerConfig} for
+ * It is designed to provide Modular Crypt Format standard output with
  * {@link Serializer}
  * It generates new random 256bit {@link SecretKey} for every data encryption.
  * Randomly generated AES secret key is used to encrypt credentials. Initial vector
@@ -34,24 +32,15 @@ import java.util.Arrays;
  */
 public class EncryptorRsaOaepAesGcm implements Encryptor {
     public static final String ID = "RSA-OAEP-SHA256-MGF1+AES-GCM-256";
-    private static final String ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
     private static final String VERSION = "v=1";
-    private static final Serializer modelSerializer;
-    private static final Serializer paramsSerializer;
-    static{
-        modelSerializer = new ConfigurableSerializer(
-                new McfModelBase64()
-        );
-        paramsSerializer = new ConfigurableSerializer(
-                new ParametersSerializerConfig()
-        );
-    }
+    private final Serializer modelSerializer;
+    private final Serializer paramsSerializer;
 
     private final BaseAes baseAes;
     private final BaseRsa baseRsa;
-    private KeyGenerator keyGenerator;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    private final KeyGenerator keyGenerator;
+    private final PublicKey publicKey;
+    private final PrivateKey privateKey;
 
     /**
      * Create instance of Hybrid RSA OAEP SHA256 MGF1(SHA256) padding and AES GCM.
@@ -71,6 +60,8 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
         }catch (Exception e){
             throw new RuntimeException("Could not configure class. Root cause"+ e.getMessage(), e);
         }
+        modelSerializer = SerializerFactory.getInstance(SerializerType.MCF_BASE64);
+        paramsSerializer = SerializerFactory.getInstance(SerializerType.MCF_PARAMETER);
     }
 
     /**

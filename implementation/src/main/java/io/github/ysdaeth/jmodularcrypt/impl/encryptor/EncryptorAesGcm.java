@@ -2,14 +2,13 @@ package io.github.ysdaeth.jmodularcrypt.impl.encryptor;
 
 
 import io.github.ysdaeth.jmodularcrypt.api.Encryptor;
-import io.github.ysdaeth.jmodularcrypt.config.McfModelBase64;
-import io.github.ysdaeth.jmodularcrypt.config.ParametersSerializerConfig;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerFactory;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.factory.SerializerType;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAes;
 import io.github.ysdaeth.jmodularcrypt.core.encryptor.aes.BaseAesFactory;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.Module;
-import io.github.ysdaeth.jmodularcrypt.common.annotations.SerializerCreator;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.ConfigurableSerializer;
-import io.github.ysdaeth.jmodularcrypt.common.serializer.Serializer;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.Module;
+import io.github.ysdaeth.jmodularcrypt.core.annotations.SerializerCreator;
+import io.github.ysdaeth.jmodularcrypt.core.serializer.Serializer;
 
 import javax.crypto.SecretKey;
 import java.security.KeyException;
@@ -20,27 +19,19 @@ import java.util.Arrays;
  * Class uses AES GCM.
  * Class purpose is to encrypt credentials that are needed to be recovered for
  * service functionality.
- * It is designed to provide Modular Crypt Format standard output.
- * It uses {@link McfModelBase64} for{@link Serializer}.
+ * It is designed to provide Modular Crypt Format standard output with {@link Serializer}.
  * For more details see {@link Encryptor}
  * <p>Example</p>
- * $AES-GCM $v=1 $iv=aBc $encryptedValue  (without spaces)
+ * {@code $AES-GCM$v=1$iv=aBc$encryptedValue}
  */
 public class EncryptorAesGcm implements Encryptor {
 
     public static final String ID = "AES-GCM";
     private static final String VERSION = "v=1";
-    private static final Serializer modelSerializer;
-    private static final Serializer paramsSerializer;
+    private final Serializer modelSerializer;
+    private final Serializer paramsSerializer;
+
     private SecretKey secretKey;
-    static{
-        modelSerializer = new ConfigurableSerializer(
-                new McfModelBase64()
-        );
-        paramsSerializer = new ConfigurableSerializer(
-                new ParametersSerializerConfig()
-        );
-    }
 
     private final BaseAes baseAes;
 
@@ -50,6 +41,9 @@ public class EncryptorAesGcm implements Encryptor {
      * @param secretKey key for encryption and decryption
      */
     public EncryptorAesGcm(SecretKey secretKey){
+        modelSerializer = SerializerFactory.getInstance(SerializerType.MCF_BASE64);
+        paramsSerializer = SerializerFactory.getInstance(SerializerType.MCF_PARAMETER);
+
         this.secretKey = validateKey(secretKey);
         baseAes = BaseAesFactory.getInstance("GCM");
     }
