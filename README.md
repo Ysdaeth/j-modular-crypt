@@ -1,9 +1,9 @@
 # j-modular-crypt
 
 ## About
-Annotation driven Java library that make Modular Crypt Format (MCF) outputs easier to create.
+Annotation driven Java library that makes Modular Crypt Format (MCF) outputs easier to create.
 Core functionality of the library is serialization and deserialization MCF structures, parsing,
-and conversion of basic data types commonly used used by MCF. 
+and basic data types conversion. 
 
 ---
 
@@ -11,7 +11,7 @@ and conversion of basic data types commonly used used by MCF.
 
 - Standardized output format based on **Modular Crypt Format (MCF)**
 - API for cryptographic algorithm implementations
-- Reflection based MCF serialization and parsing
+- Reflection based MCF serialization and deserializarion
 - Configurable type conversion
 - Annotation driven design
 - Default implementations
@@ -20,19 +20,19 @@ and conversion of basic data types commonly used used by MCF.
 
 ## Use Cases
 
-- Standardizing encryption outputs
+- Standardization encryption and hashing outputs
 - Interoperable cryptographic storage formats
 
 ## Modules & Packages
 
 ### API module
-The `api` package contains interfaces intended for third-party applications.
+The `api` module contains interfaces intended for third-party applications.
 
 ---
 
-## Common module
+## Core module
 
-The `core` module contains core functionality shared across the library.
+The `core` module contains core functionality of the library.
 
 - Converter
 - Parser
@@ -42,9 +42,9 @@ The `core` module contains core functionality shared across the library.
 ---
 
 ## Implementation module
-This module contains the base implementations of the `API` module/package.
+Implementation module contains the base implementations of the `API` module.
 
-Provides encrypted/hashed data where algorithm output matches Modular Crypt Format. Cryptographic algorithms are supplied by the Java Security Provider. This is not core feature of the library, it serves as an access layer to cryptographic algorithms to get started quickly.
+Provides Modular Crypt Format algorithm outputs. Cryptographic algorithms are supplied by the Java Security Provider. This is not core feature of the library, it serves as an access layer to cryptographic algorithms to get started quickly.
 
 ### Mac
 
