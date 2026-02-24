@@ -5,13 +5,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class RsaEncryptorsTest {
@@ -24,39 +28,99 @@ public class RsaEncryptorsTest {
     @ParameterizedTest
     @MethodSource("provider")
     void encrypt_shouldNotReturnBlank(Encryptor encryptor) throws Exception{
+        KeyPair keyPair = keyGen();
         byte[] credentials = getSecret();
-        String encrypted = encryptor.encrypt(credentials);
+        String encrypted = encryptor.encrypt(credentials, keyPair.getPublic());
         Assertions.assertFalse(encrypted.isBlank(),"Encrypted is blank for: "+encryptor.getClass());
     }
 
     @ParameterizedTest
     @MethodSource("provider")
-    void encrypt_shouldNotReturnTheSameArray(Encryptor encryptor) throws Exception{
-        byte[] expected = getSecret();
-        String encrypted = encryptor.encrypt(expected);
-        String base64 = Arrays.stream(encrypted.split("\\$")).toList().getLast();
-        byte[] actual = Base64.getDecoder().decode(base64);
-        boolean equals = Arrays.equals(actual,expected);
-        Assertions.assertFalse(equals,"Secret is not encrypted");
+    void encrypt_shouldNotContainUnencryptedSecret(Encryptor encryptor) throws Exception{
+        KeyPair keyPair = keyGen();
+        byte[] secret = getSecret();
+
+        String mcf = encryptor.encrypt(secret,keyPair.getPublic());
+        String encryptedBase64 = Arrays.stream(mcf.split("\\$")).toList().getLast();
+        byte[] encrypted = Base64.getDecoder().decode(encryptedBase64);
+
+        boolean isEncrypted = !Arrays.equals(encrypted,secret);
+        Assertions.assertTrue(isEncrypted,"Secret is not encrypted for "+encryptor.getClass());
     }
 
     @ParameterizedTest
     @MethodSource("provider")
-    void decrypt_shouldReturnSecret(Encryptor encryptor) throws Exception{
-        byte[] expected = getSecret();
-        String encrypted = encryptor.encrypt(expected);
-        byte[] actual = encryptor.decrypt(encrypted);
-        boolean equals = Arrays.equals(expected,actual);
-        Assertions.assertTrue(equals,"Secret after decryption is not the same");
+    void decrypt_shouldReturnTheSameSecret(Encryptor encryptor) throws Exception{
+        KeyPair keyPair = keyGen();
+
+        byte[] secret = getSecret();
+        String mcf = encryptor.encrypt(secret,keyPair.getPublic());
+
+        byte[] decrypted = encryptor.decrypt(mcf,keyPair.getPrivate());
+        boolean isTheSameSecret = Arrays.equals(secret,decrypted);
+        Assertions.assertTrue(isTheSameSecret,"Secret after decryption is not the same");
     }
 
-    public static Stream<Encryptor> provider() throws Exception{
+    @ParameterizedTest
+    @MethodSource("provider")
+    void encrypt_shouldThrowExceptionOnIncorrectKeyClass(Encryptor encryptor){
+        byte[] keyBytes = new byte[32];
+        new SecureRandom().nextBytes(keyBytes);
+        SecretKey secretKey = new SecretKeySpec(keyBytes,"AES");
+        Assertions.assertThrows(IllegalArgumentException.class,()->{
+            encryptor.encrypt(new byte[]{1,2,3},secretKey);
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("provider")
+    void decrypt_shouldThrowExceptionOnIncorrectKeyClass(Encryptor encryptor){
+        byte[] keyBytes = new byte[32];
+        new SecureRandom().nextBytes(keyBytes);
+        SecretKey secretKey = new SecretKeySpec(keyBytes,"AES");
+        Assertions.assertThrows(IllegalArgumentException.class,()->{
+            encryptor.decrypt("",secretKey);
+        },"Incorrect exception thrown for incorrect key type.  "+ encryptor.getClass() );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provider")
+    void decrypt_shouldThrowKeyExceptionOnOtherKey(Encryptor encryptor) throws Exception{
+        KeyPair validKeyPair = keyGen();
+        KeyPair invalidKeyPair = keyGen();
+
+        byte[] secret = getSecret();
+        String encrypted = encryptor.encrypt(secret,validKeyPair.getPublic());
+
+        Assertions.assertThrows(KeyException.class,()->{
+            encryptor.decrypt(encrypted, invalidKeyPair.getPrivate());
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("provider")
+    void decrypt_shouldThrowIncorrectAlgorithmException(Encryptor encryptor) throws Exception{
         KeyPair keyPair = keyGen();
-        PublicKey publicKey = keyPair.getPublic();
-        PrivateKey privateKey = keyPair.getPrivate();
+        byte[] secret = getSecret();
+
+        String mcf = encryptor.encrypt(secret, keyPair.getPublic());
+        List<String> modules = Arrays.stream(mcf.split("\\$"))
+                .filter(s->!s.isBlank()).toList();
+        ArrayList<String> parts = new ArrayList<>(modules);
+
+        parts.set(0,"RSA-OAEP");
+        String changedMcf = "$"+ String.join("$",parts);
+
+        Assertions.assertThrows(IncorrectAlgorithmException.class,()->{
+            encryptor.decrypt(changedMcf, keyPair.getPrivate());
+        });
+    }
+
+
+    public static Stream<Encryptor> provider(){
         return Stream.of(
-                new EncryptorRsaOaep(publicKey,privateKey),
-                new EncryptorRsaOaepAesGcm(publicKey,privateKey)
+                new EncryptorRsaOaep(),
+                new EncryptorRsaOaepAesGcm()
         );
     }
 

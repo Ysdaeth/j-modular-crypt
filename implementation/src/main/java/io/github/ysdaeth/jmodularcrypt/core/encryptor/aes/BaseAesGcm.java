@@ -1,8 +1,12 @@
 package io.github.ysdaeth.jmodularcrypt.core.encryptor.aes;
 
+import javax.crypto.AEADBadTagException;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
 import java.security.KeyException;
 
 /**
@@ -35,7 +39,7 @@ final class BaseAesGcm implements BaseAes{
             GCMParameterSpec spec = new GCMParameterSpec(TAG_LENGTH,initialVector);
             cipher.init(Cipher.ENCRYPT_MODE,secretKey,spec);
             encrypted = cipher.doFinal(rawSecret);
-        }catch (KeyException e){
+        }catch (KeyException | BadPaddingException | InvalidAlgorithmParameterException e){
             throw new KeyException(e);
         } catch (Exception e){
             throw new RuntimeException(e);
@@ -61,7 +65,7 @@ final class BaseAesGcm implements BaseAes{
             GCMParameterSpec spec = new GCMParameterSpec(TAG_LENGTH,initialVector);
             cipher.init(Cipher.DECRYPT_MODE,secretKey,spec);
             decrypted = cipher.doFinal(encrypted);
-        }catch (KeyException e){
+        }catch (KeyException | AEADBadTagException | InvalidAlgorithmParameterException e){
             throw new KeyException(e);
         }catch (Exception e){
             throw new RuntimeException(e);

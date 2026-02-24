@@ -11,77 +11,99 @@ import io.github.ysdaeth.jmodularcrypt.core.serializer.Serializer;
 
 import java.security.*;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * Class uses RSA OAEP SHA256 with MGF1(SHA256) padding.
- * Class purpose is to encrypt secret that are needed to be recovered for
- * service functionality, like email address. If data exceeds algorithm capacity then use
- * {@link EncryptorRsaOaepAesGcm}
- * It is designed to provide Modular Crypt Format standard output.
+ * <h2>RSA encryptor</h2>
+ * Class uses RSA OAEP SHA256 with MGF1 padding provided by the {@link java.security.Provider}
+ * Class purpose is to encrypt data and return it in a Modular Crypt Format standard output.
+ * If data exceeds algorithm capacity then use hybrid {@link EncryptorRsaOaepAesGcm}
  * For more details see {@link Encryptor}
- * <p>Example</p>
- * $RSA-OAEP-SHA256-MGF1 $v=1 $encryptedValue  (without spaces)
+ * <p>Example Modular Crypt Output Format</p>
+ * $RSA-OAEP-SHA256-MGF1$v=1$encryptedBytesBase64
  */
 public final class EncryptorRsaOaep implements Encryptor {
-    public static final String ID = "RSA-OAEP-SHA256-MGF1";
+    public static final String IDENTIFIER = "RSA-OAEP-SHA256-MGF1";
     private static final String VERSION = "v=1";
     private final Serializer serializer ;
     private final BaseRsa baseRsa;
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
 
     /**
-     * Create instance of asymmetric RSA OAEP SHA256 MGF1(SHA256) padding.
-     * Keys provided as an argument do not need to be a pair, that means this instance can be used
-     * for key rotations when non pair keys are needed.
-     * @param publicKey key for encryption
-     * @param privateKey key for decryption
+     * Creates an instance of the asymmetric RSA OAEP SHA256 MGF1 padding, provided
+     * by the {@link java.security.Provider} and implemented with a basic configuration.
      */
-    public EncryptorRsaOaep(PublicKey publicKey, PrivateKey privateKey){
-        try{
-            this.publicKey = validateKey(publicKey);
-            this.privateKey = validateKey(privateKey);
-        }catch (Exception e){
-            throw new RuntimeException("Invalid key. Cause: " + e.getMessage(),e);
-        }
+    public EncryptorRsaOaep(){
         this.serializer = SerializerFactory.getInstance(SerializerType.MCF_BASE64);
         this.baseRsa = BaseRsaFactory.getInstance("OAEP");
     }
 
     /**
-     * Encrypt secret with public key and return Modular Crypt Format string value.
-     * It uses {@link Serializer} configured to match MCF format.
-     * Argument passed as an argument is cloned and filled with 0 bytes after encryption,
-     * but secret itself is not modified.
-     * @param secret credentials to be encrypted
-     * @return Modular Crypt Format string representation
+     * Encrypts data with provided key and returns encrypted data in Modular Crypt Format.
+     * Key must be an instance of the {@link PublicKey}
+     * Does not modify the original byte array.
+     * <blockquote><pre>
+     *     PublicKey pubKey = // get a public key;
+     *     byte[] secret = new byte[]{1,2,3};
+     *     Encryptor rsa = new EncryptorRsaOaep();
+     *     String mcf = rsa.encrypt(secret, secretKey);
+     * </pre></blockquote>
+     * @param data Secret to be encrypted
+     * @return encrypted data as a Modular Crypt Format string representation.
+     * @param encryptionKey instance of the {@link PublicKey}
      * @throws KeyException when key does not match or is invalid
      */
     @Override
-    public String encrypt(byte[] secret) throws KeyException{
-        byte[] credentials = secret.clone();
+    public String encrypt(byte[] data, Key encryptionKey) throws KeyException{
+        if(encryptionKey == null)
+            throw new IllegalArgumentException("Encryption key must not be null");
+
+        if(! (encryptionKey instanceof PublicKey castedPublicKey))
+            throw new IllegalArgumentException("Encryption key must be instance of the "+ PublicKey.class);
+
+        byte[] rawBytes = data.clone();
         try{
-            byte[] encrypted = baseRsa.encrypt(credentials,publicKey);
-            McfEntity mcf = new McfEntity(ID,VERSION,encrypted);
+            byte[] encrypted = baseRsa.encrypt(rawBytes,castedPublicKey);
+            RsaMcfEntity mcf = new RsaMcfEntity(IDENTIFIER,VERSION,encrypted);
             return serializer.serialize(mcf);
         }finally {
-            Arrays.fill(credentials,(byte)0);
+            Arrays.fill(rawBytes,(byte)0);
         }
     }
 
     /**
-     * Decrypt Modular Crypt Format string representation with private key
-     * and return decrypted string. It uses {@link Serializer} configured to match
-     * MCF format
+     * Decrypts encrypted data stored in Modular Crypt Format string representation,
+     * and returns decrypted data as the bytes array. Provided key must
+     * be an instance of the {@link PrivateKey}
+     * <blockquote><pre>
+     *     PrivateKey privKey = // get a private key;
+     *     String mcf = "$RSA-OAEP-SHA256-MGF1$v=1$encryptedBytesBase64";
+     *     Encryptor rsa = new EncryptorRsaOaep();
+     *     byte[] secret = rsa.decrypt(mcf,privKey);
+     * </pre></blockquote>
      * @param serializedMcf Modular Crypt Format string with encrypted value
-     * @return decrypted secret
-     * @throws KeyException when key does not match or is invalid
+     * @param decryptionKey instance of the {@link PrivateKey}
+     * @return decrypted data as bytes array
+     * @throws KeyException when key does not match the encrypted data or is invalid
      */
     @Override
-    public byte[] decrypt(String serializedMcf) throws KeyException{
-        McfEntity mcf = serializer.deserialize(serializedMcf, McfEntity.class);
-        byte[] encrypted = mcf.encrypted();
-        return baseRsa.decrypt(encrypted,privateKey);
+    public byte[] decrypt(String serializedMcf, Key decryptionKey) throws KeyException{
+        if(decryptionKey == null) {
+            throw new IllegalArgumentException("Decryption key must not be null");
+        }
+
+        if(!(decryptionKey instanceof PrivateKey castedPrivateKey)) {
+            throw new IllegalArgumentException("Decryption key must be an instance of the " + PrivateKey.class);
+        }
+
+        RsaMcfEntity model = serializer.deserialize(serializedMcf, RsaMcfEntity.class);
+        if(!IDENTIFIER.equals(model.identifier)){
+            throw new IncorrectAlgorithmException(String.format(
+                    "Incorrect algorithm. Required is '%s' but provided was '%s'.", IDENTIFIER, model.identifier)
+            );
+        }
+
+        byte[] encrypted = model.encrypted();
+        return baseRsa.decrypt(encrypted,castedPrivateKey);
     }
 
     /**
@@ -89,7 +111,7 @@ public final class EncryptorRsaOaep implements Encryptor {
      */
     @Override
     public String identifier() {
-        return ID;
+        return IDENTIFIER;
     }
 
     /**
@@ -100,18 +122,10 @@ public final class EncryptorRsaOaep implements Encryptor {
         return VERSION;
     }
 
-    private static <T extends Key> T validateKey(T key){
-        if (key == null) throw new IllegalArgumentException("Key must not be null");
-        String keyAlg = key.getAlgorithm();
-        if (!"RSA".equals(keyAlg)) throw new IllegalArgumentException("Key algorithm must be RSA, but provided was: "+ keyAlg);
-        return key;
-    }
-
     /**
-     * Class is used as model for Modular Crypt Format representation for
-     * this instance algorithm output.
+     * Class is used as model for Modular Crypt Format representation
      */
-    private static final class McfEntity{
+    private static final class RsaMcfEntity {
         @Module(order = 0)
         private final String identifier;
         @Module(order = 1)
@@ -120,10 +134,10 @@ public final class EncryptorRsaOaep implements Encryptor {
         private final byte[] encrypted;
 
         @SerializerCreator
-        public McfEntity(String identifier, String version, byte[] encrypted) {
-            this.identifier = identifier;
-            this.version = version;
-            this.encrypted = encrypted;
+        public RsaMcfEntity(String identifier, String version, byte[] encrypted) {
+            this.identifier = Objects.requireNonNull(identifier,"Identifier must not be null");
+            this.version = Objects.requireNonNull(version,"Version must not be null");
+            this.encrypted = Objects.requireNonNull(encrypted,"Encrypted data must not be null");
         }
 
         public String identifier(){

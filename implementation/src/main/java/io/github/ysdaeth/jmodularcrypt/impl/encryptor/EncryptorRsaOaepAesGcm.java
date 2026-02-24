@@ -16,22 +16,22 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * Class uses RSA OAEP SHA256 with MGF1(SHA256) padding and AES GCM.
- * Class purpose is to encrypt credentials that size exceeds {@link EncryptorRsaOaep}
- * It is designed to provide Modular Crypt Format standard output with
- * {@link Serializer}
- * It generates new random 256bit {@link SecretKey} for every data encryption.
- * Randomly generated AES secret key is used to encrypt credentials. Initial vector
- * is random 12bytes length.
- * After encrypting credentials random key itself is encrypted with RSA.
+ * <h2>Hybrid RSA and AES</h2>
  *
- * <p>Example</p>
- * $RSA-OAEP-SHA256-MGF1+AES-GCM-256 $v=1 $iv=abc $encryptedKey $encryptedValue  (without spaces)
+ * Class uses RSA OAEP SHA256 with MGF1 padding and AES GCM with 96bit initial vector
+ * for a hybrid data encryption / decryption. It generates new random 256bit
+ * {@link SecretKey} used by AES GCM, for every data encryption. Actual algorithms implementations are provided
+ * by the {@link java.security.Provider}. Class purpose is to encrypt data that size exceeds
+ * {@link EncryptorRsaOaep} and return encrypted data in Modular Crypt Format standard output.
+ * After encrypting data with a randomly generated AES GCM key, AES key itself is encrypted with RSA.
+ * <p>Example Modular Crypt Output Format</p>
+ * $RSA-OAEP-SHA256-MGF1+AES-GCM-256$v=1$iv=abc$encryptedRandomKey$encryptedValue
  */
 public class EncryptorRsaOaepAesGcm implements Encryptor {
-    public static final String ID = "RSA-OAEP-SHA256-MGF1+AES-GCM-256";
+    public static final String IDENTIFIER = "RSA-OAEP-SHA256-MGF1+AES-GCM-256";
     private static final String VERSION = "v=1";
     private final Serializer modelSerializer;
     private final Serializer paramsSerializer;
@@ -39,76 +39,92 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
     private final BaseAes baseAes;
     private final BaseRsa baseRsa;
     private final KeyGenerator keyGenerator;
-    private final PublicKey publicKey;
-    private final PrivateKey privateKey;
 
     /**
-     * Create instance of Hybrid RSA OAEP SHA256 MGF1(SHA256) padding and AES GCM.
-     * Keys provided as an argument do not need to be a pair, that means this instance can be used
-     * for key rotations when non pair keys are needed.
-     * @param publicKey key for encryption
-     * @param privateKey key for decryption
+     * Creates an instance of the hybrid RSA OAEP SHA256 MGF1 padding and AES GCM, provided
+     * by the {@link java.security.Provider} and implemented with a basic configuration.
      */
-    public EncryptorRsaOaepAesGcm(PublicKey publicKey, PrivateKey privateKey) {
+    public EncryptorRsaOaepAesGcm() {
         try{
-            this.publicKey = validateKey(publicKey);
-            this.privateKey = validateKey(privateKey);
             keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(256);
             baseAes = BaseAesFactory.getInstance("GCM");
             baseRsa = BaseRsaFactory.getInstance("OAEP");
         }catch (Exception e){
-            throw new RuntimeException("Could not configure class. Root cause"+ e.getMessage(), e);
+            throw new RuntimeException("Could not configure the class. Root cause"+ e.getMessage(), e);
         }
         modelSerializer = SerializerFactory.getInstance(SerializerType.MCF_BASE64);
         paramsSerializer = SerializerFactory.getInstance(SerializerType.MCF_PARAMETER);
     }
 
     /**
-     * Encrypt bytes with generated random secret key and return Modular Crypt Format
-     * string representation. It uses {@link Serializer} configured to match MCF format.
-     * Random 256bit AES key is generated, and secret is encrypted with that key, then
-     * key itself is encrypted with RSA public key. secret is cloned and filled with 0 bytes
-     * after encryption, but secret passed as an argument is not modified.
-     * @param secret credentials to be encrypted
-     * @return Modular Crypt Format string representation
-     * @throws KeyException when key does not match or is invalid
+     * Encrypts data with the generated random secret key and returns encrypted
+     * data in Modular Crypt Format string representation.
+     * Generates a random 256bit AES key, and uses it to encrypt the data, then
+     * key itself is encrypted with RSA public key. Bytes passed as an argument are
+     * cloned and after encryption are filled with 0 bytes original array is not modified.
+     * <blockquote><pre>
+     *     PublicKey pubKey = // get a public key;
+     *     byte[] secret = new byte[]{1,2,3};
+     *     Encryptor rsa = new EncryptorRsaOaepAesGcm();
+     *     String mcf = rsa.encrypt(secret, secretKey);
+     * </pre></blockquote>
+     * @param data data to be encrypted.
+     * @param publicKey instance of the {@link PublicKey}.
+     * @return encrypted data in Modular Crypt Format string representation.
+     * @throws KeyException when key does not match this algorithm.
      */
     @Override
-    public String encrypt(byte[] secret) throws KeyException {
-        byte[] credentials = secret.clone();
+    public String encrypt(byte[] data, Key publicKey) throws KeyException {
+        if(publicKey == null)
+            throw new IllegalArgumentException("Encryption key must not be null");
+
+        if(! (publicKey instanceof PublicKey castedPublicKey))
+            throw new IllegalArgumentException("Encryption key must be instance of the "+ PublicKey.class);
+
+        byte[] credentials = data.clone();
         try{
-            return encryptUnsafe(credentials);
+            return encryptUnsafe(credentials,castedPublicKey);
         } finally {
             Arrays.fill(credentials,(byte)0);
         }
     }
-    private String encryptUnsafe(byte[] secret) throws KeyException{
+    private String encryptUnsafe(byte[] secret, PublicKey publicKey) throws KeyException{
         byte[] iv = new byte[12];
         new SecureRandom().nextBytes(iv);
         SecretKey secretKey = keyGenerator.generateKey();
         byte[] encryptedKey = baseRsa.encrypt(secretKey.getEncoded(),publicKey);
         byte[] encryptedCredentials = baseAes.encrypt(secret,secretKey,iv);
         String params = paramsSerializer.serialize( new McfParams(iv) );
-        McfModel model = new McfModel(ID,VERSION,params,encryptedKey,encryptedCredentials);
+        RsaAesMcfModel model = new RsaAesMcfModel(IDENTIFIER,VERSION,params,encryptedKey,encryptedCredentials);
         return modelSerializer.serialize(model);
     }
 
     /**
-     * Decrypt Modular Crypt Format string representation with private key
-     * and return decrypted as string. It uses {@link Serializer} configured to match
-     * MCF format. It decrypts encrypted AES 256bit key with RSA private key. Decrypted AES
-     * key is used to decrypt main data
-     * @param encrypted credentials to be decrypted from Modular Crypt Format
-     *                      string representation
-     * @return decrypted credentials as string
-     * @throws KeyException when key does not match or is invalid
+     * Decrypts data stored in the Modular Crypt Format string representation and returns
+     * decrypted as the bytes array.
+     * @param mcf data to be decrypted from Modular Crypt Format string representation
+     * @return decrypted data as a bytes array
+     * @throws KeyException when key does not match the encrypted secret or this algorithm
      */
     @Override
-    public byte[] decrypt(String encrypted) throws KeyException {
-        McfModel model = modelSerializer.deserialize(encrypted,McfModel.class);
+    public byte[] decrypt(String mcf, Key privateKey) throws KeyException {
+        if(privateKey == null)
+            throw new IllegalArgumentException("Decryption key must not be null");
+
+        if(!(privateKey instanceof PrivateKey castedPrivateKey))
+            throw new IllegalArgumentException("Decryption key must be an instance of the "+ PrivateKey.class);
+
+        RsaAesMcfModel model = modelSerializer.deserialize(mcf, RsaAesMcfModel.class);
+
+        if(!IDENTIFIER.equals(model.identifier)){
+            throw new IncorrectAlgorithmException(String.format(
+                    "Incorrect algorithm. Required is '%s' but provided was '%s'.", IDENTIFIER, model.identifier)
+            );
+        }
+
         McfParams params = paramsSerializer.deserialize(model.params,McfParams.class);
-        byte[] keyBytes = baseRsa.decrypt(model.encryptedKey,privateKey);
+        byte[] keyBytes = baseRsa.decrypt(model.encryptedKey,castedPrivateKey);
         SecretKey secretKey = new SecretKeySpec(keyBytes,"AES");
         return baseAes.decrypt(model.encryptedSecret,secretKey,params.iv);
     }
@@ -118,7 +134,7 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
      */
     @Override
     public String identifier() {
-        return ID;
+        return IDENTIFIER;
     }
 
     /**
@@ -129,18 +145,11 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
         return VERSION;
     }
 
-    private static <T extends Key> T validateKey(T key){
-        if (key == null) throw new IllegalArgumentException("Key must not be null");
-        String keyAlg = key.getAlgorithm();
-        if (!"RSA".equals(keyAlg)) throw new IllegalArgumentException("Key algorithm must be RSA, but provided was: "+ keyAlg);
-        return key;
-    }
-
     /**
      * Class is used as model for Modular Crypt Format representation for
      * this instance algorithm output.
      */
-    private static final class McfModel{
+    private static final class RsaAesMcfModel {
         @Module(order = 0)
         private final String identifier;
         @Module(order = 1)
@@ -153,12 +162,12 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
         private final byte[] encryptedSecret;
 
         @SerializerCreator
-        public McfModel(String identifier, String version,String params, byte[] encryptedKey,byte[] encryptedSecret) {
-            this.identifier = identifier;
-            this.version = version;
-            this.params = params;
-            this.encryptedKey = encryptedKey;
-            this.encryptedSecret = encryptedSecret;
+        public RsaAesMcfModel(String identifier, String version, String params, byte[] encryptedKey, byte[] encryptedSecret) {
+            this.identifier = Objects.requireNonNull(identifier,"Identifier module must not be null");
+            this.version = Objects.requireNonNull(version,"Version module must not be null");
+            this.params = Objects.requireNonNull(params,"Params module must not be null");
+            this.encryptedKey = Objects.requireNonNull(encryptedKey,"Encrypted key module must not be null");
+            this.encryptedSecret = Objects.requireNonNull(encryptedSecret,"Encrypted data module must not be null");
         }
     }
 
@@ -172,7 +181,7 @@ public class EncryptorRsaOaepAesGcm implements Encryptor {
 
         @SerializerCreator
         public McfParams(byte[] iv) {
-            this.iv = iv;
+            this.iv = Objects.requireNonNull(iv,"Initial vector must not be null");
         }
     }
 }
