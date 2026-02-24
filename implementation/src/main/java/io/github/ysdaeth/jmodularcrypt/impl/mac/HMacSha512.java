@@ -18,8 +18,7 @@ public class HMacSha512 extends AbstractHMac{
      * @param secretKey secret key to make sign for message
      */
     public HMacSha512(SecretKey secretKey) {
-        BaseHMac hMac = new BaseHMac("HmacSha512");
-        super(hMac, secretKey, IDENTIFIER);
+        super(new BaseHMac("HmacSha512"), secretKey, IDENTIFIER);
     }
 
 }

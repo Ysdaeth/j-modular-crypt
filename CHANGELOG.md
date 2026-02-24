@@ -3,7 +3,7 @@
 
 ## API
 
-## Version: 1.3.0
+### Version: 1.3.0
 - Encryptor API now requires `Key` for cryptographic operations
 
 Reason: Simplify data encryption and decryption, while using dynamic key rotation, for 
@@ -25,9 +25,10 @@ Reason: To make Encryptors easier to manage, provide hashing functions.
 
 ## IMPLEMENTATION
 
-## Version: 1.3.0
+### Version: 1.3.0
 - Implementations of the Encryptor interface now requires a `Key` for cryptographic operations.
 - Encryptors no longer store a `Key`.
+- Decreased required java version to java 17
 
 Reason: To reduce responsibility related to the key caching, and simplify data encryption and decryption,
 while using dynamic key rotation, for a multithreaded environments with Encryptor as a single bean.
@@ -37,10 +38,10 @@ while using dynamic key rotation, for a multithreaded environments with Encrypto
 - Encryptor AES now will throw Key Exception on invalid key 
 
 
-## Version: 1.2.0
-- Decreased required java version to java 17
+### Version: 1.2.0
+- Updated serializer version
 
-Reason: To make Encryptors easier to manage, provide hashing functions.
+Reason: Core dependency Serializer change
 
 
 ### Version 1.1.0

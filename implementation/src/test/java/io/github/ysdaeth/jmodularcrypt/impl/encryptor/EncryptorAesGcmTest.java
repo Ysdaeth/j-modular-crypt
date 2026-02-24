@@ -53,7 +53,8 @@ class EncryptorAesGcmTest {
         byte[] secret = secretBytes();
         String encrypted = encryptor.encrypt(secret,secretKey);
 
-        String encryptedBase64 = Arrays.stream(encrypted.split("\\$")).toList().getLast();
+        List<String> parts = Arrays.stream(encrypted.split("\\$")).toList();
+        String encryptedBase64 = parts.get(parts.size() -1);
         byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
 
         boolean isEncrypted = !Arrays.equals(secret,encryptedBytes);

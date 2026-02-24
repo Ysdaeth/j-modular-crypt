@@ -9,27 +9,20 @@
     </parent>
 
     <artifactId>api</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
 
     <name>api</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
     <dependencies>
     </dependencies>
 
     <build><plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>17</source>
-                <target>17</target>
-            </configuration>
-        </plugin>
 
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>

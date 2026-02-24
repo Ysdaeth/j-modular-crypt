@@ -41,7 +41,8 @@ public class RsaEncryptorsTest {
         byte[] secret = getSecret();
 
         String mcf = encryptor.encrypt(secret,keyPair.getPublic());
-        String encryptedBase64 = Arrays.stream(mcf.split("\\$")).toList().getLast();
+        List<String> modules = Arrays.stream(mcf.split("\\$")).toList();
+        String encryptedBase64 = modules.get(modules.size()-1);
         byte[] encrypted = Base64.getDecoder().decode(encryptedBase64);
 
         boolean isEncrypted = !Arrays.equals(encrypted,secret);

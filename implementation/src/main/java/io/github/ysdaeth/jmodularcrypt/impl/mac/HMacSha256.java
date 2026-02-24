@@ -18,8 +18,7 @@ public final class HMacSha256 extends AbstractHMac {
      * @param secretKey secret key to make sign for message
      */
     public HMacSha256(SecretKey secretKey) {
-        BaseHMac hMac = new BaseHMac("HmacSha256");
-        super(hMac, secretKey, IDENTIFIER);
+        super(new BaseHMac("HmacSha256"), secretKey, IDENTIFIER);
     }
 
 }
