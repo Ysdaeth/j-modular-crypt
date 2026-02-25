@@ -6,16 +6,16 @@ import javax.crypto.SecretKey;
 
 /**
  * Thread safe class.
- * Class that is wrapper for HMac Sha 256 cipher instance.
- * It produces sign for message and verification of that sign.
- * It is designed to provide Modular Crypt Format standard output.
+ * Class is wrapper for the HMac Sha256 cipher instance provided by the {@link java.security.Provider}.
+ * It produces sign for a message in the Modular Crypt Format
+ * {@link AbstractHMac}
  */
 public final class HMacSha256 extends AbstractHMac {
     private static final String IDENTIFIER = "HMAC-SHA256";
 
     /**
-     * Create HMac Sha 256 instance
-     * @param secretKey secret key to make sign for message
+     * Creates HMac Sha256 instance, that produces message sing in the Modular Crypt Format
+     * @param secretKey secret key to create sign
      */
     public HMacSha256(SecretKey secretKey) {
         super(new BaseHMac("HmacSha256"), secretKey, IDENTIFIER);

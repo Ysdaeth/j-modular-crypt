@@ -6,9 +6,9 @@ import javax.crypto.SecretKey;
 
 /**
  * Thread safe class.
- * Class that is wrapper for HMac Sha 512 cipher instance.
- * It produces sign for message and verification of that sign.
- * It is designed to provide Modular Crypt Format standard output.
+ * Class is wrapper for the HMac Sha512 cipher instance provided by the {@link java.security.Provider}.
+ * It produces sign for a message in the Modular Crypt Format
+ * {@link AbstractHMac}
  */
 public class HMacSha512 extends AbstractHMac{
     private static final String IDENTIFIER = "HMAC-SHA512";

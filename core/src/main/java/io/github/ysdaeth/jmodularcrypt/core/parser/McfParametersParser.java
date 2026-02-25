@@ -5,9 +5,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parser is designed to create Modular Crypt Format (MCF) parameters string output
- * MCF parameters format are sections delimited by the ',' sign. and between every
+ * <h2>Modular Crypt Format Parameters</h2>
+ * Parser is designed to create Modular Crypt Format parameters output
+ * MCF parameters are sections delimited by the ',' sign. and between every
  * key and value there is '=' sign.
+ * <p>Example of the Parameter</p>
+ * <blockquote><pre>
+ *     String parameters = "id=1,iv=f3oE"
+ * </pre></blockquote>
+ * <blockquote><pre>
+ *     String parameters = "id=1,iv=ewE=" //value can contain '=' sign
+ * </pre></blockquote>
  */
 public class McfParametersParser implements Parser{
 

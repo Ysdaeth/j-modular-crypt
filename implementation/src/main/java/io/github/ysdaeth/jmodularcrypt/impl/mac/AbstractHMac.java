@@ -11,10 +11,9 @@ import io.github.ysdaeth.jmodularcrypt.core.mac.BaseHMac;
 import javax.crypto.SecretKey;
 
 /**
- * Common implementation for HMac instances.
- * Class is responsible for providing implementation for messages signs and
- * verification of that signs.
- * Class uses {@link Serializer} to provide Modular Crypt Format outputs.
+ * Common implementation for HMac instances for the Modular Crypt Format outputs.
+ * Class is responsible for providing MCF layer implementation for message signing and
+ * verification of message with the sign.
  */
 abstract class AbstractHMac implements Mac {
 
@@ -25,9 +24,9 @@ abstract class AbstractHMac implements Mac {
     private final SecretKey secretKey;
 
     /**
-     * Prepare common implementation shared across HMac implementations
-     * @param baseHMac base HMac functionality
-     * @param secretKey secret key for messages signing and verification
+     * Creates shared implementation for HMac implementations
+     * @param baseHMac preconfigured implementation of the HMac algorithm
+     * @param secretKey secret key for the message signing and verification
      */
     AbstractHMac(BaseHMac baseHMac, SecretKey secretKey, String identifier){
         this.baseHMac = baseHMac;
@@ -37,7 +36,12 @@ abstract class AbstractHMac implements Mac {
     }
 
     /**
-     * Generate Modular Crypt Format sign for message bytes
+     * Generates sign in the Modular Crypt Format
+     * <blockquote><pre>
+     *     byte[] message = new byte[]{1,2,3}
+     *     Mac hmac = new HMacSha256();
+     *     String sign = hmac.sign(message);
+     * </pre></blockquote>
      * @param message bytes to be signed
      * @return Modular crypt format sign
      */
@@ -52,7 +56,7 @@ abstract class AbstractHMac implements Mac {
     }
 
     /**
-     * Returns version of this algorithm
+     * Returns the version of this algorithm
      * @return version
      */
     @Override
@@ -61,7 +65,13 @@ abstract class AbstractHMac implements Mac {
     }
 
     /**
-     * Verify if Generate Modular Crypt Format sign matches message
+     * Verifies if the generated Modular Crypt Format sign matches the message
+     * <blockquote><pre>
+     *     byte[] message = new byte[]{1,2,3}
+     *     Mac hmac = new HMacSha256();
+     *     String sign = hmac.sign(message);
+     *     boolean matches = hmac.verify(sign,message);
+     * </pre></blockquote>
      * @param sign sign to compare
      * @param message message to verify
      * @return true if sign matches message
